@@ -7,7 +7,7 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app)  # This will enable CORS for all routes
 # CORS(app, resources={r"/*": {"origins": "http://localhost:5000"}})
-const port = process.env.PORT || 4000;
+port = process.env.PORT || 4000;
 
 app.secret_key = 'your_secret_key'  # Change this to a random secret key
 os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"  # Allow http for local testing
