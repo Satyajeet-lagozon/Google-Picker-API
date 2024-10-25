@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Google Identity Services Example</title>
+    <script src="https://accounts.google.com/gsi/client?onload=gisLoaded"></script>
+    <script src="https://apis.google.com/js/api.js"></script>
+    <script type="text/javascript">
+        let tokenClient;
+
+        // This function will be called when the Google Identity Services library is loaded
+        function gisLoaded() {
+            console.log('Google Identity Services loaded successfully.');
+            initTokenClient();
+            gapi.load('picker', () => {
+                console.log('Picker API loaded.');
+            });
+
+        }
+
+        // Initialize the token client
+        function initTokenClient() {
+            tokenClient = google.accounts.oauth2.initTokenClient({
+                client_id: '446670671168-lc6u119rj022g71pl7ddjnuvf8vp00lt.apps.googleusercontent.com', // Replace with your client ID
+                scope: 'https://www.googleapis.com/auth/drive.file',
+                callback: handleAuthResult,
+                'immediate': false, // Ensure this is false
+                error_callback: (error) => {
+                console.error('Authentication error:', error);}
+            });
+            console.log('Token client initialized.');
+        }
+
+        // Handle click event for authorization
+        function handleAuthClick() {
+            if (tokenClient) {
+                console.log('Requesting access token...',tokenClient);
+                tokenClient.requestAccessToken({ prompt: 'consent' });
+                console.log('Access token request complete...');
+                // handleAuthResult;
+            } else {
+                console.error('Token client is not initialized.');
+            }
+        }
+
+        // Handle authentication result
+        function handleAuthResult(authResult) {
+            if (authResult && !authResult.error) {
+                console.log('Authentication successful:', authResult);
+                // Proceed with your application logic here
+                createPicker(authResult.access_token)
+            } else {
+                console.error('Authentication failed:', authResult ? authResult.error : 'Unknown error');
+            }
+        }
+
+        function createPicker(accessToken) {
+            const picker = new google.picker.PickerBuilder()
+                .addView(google.picker.ViewId.DOCS)
+                .setOAuthToken(accessToken)
+                .setDeveloperKey('AIzaSyDQUcI0s5AIP5mHxhS9K25hYqcgAtXqwk')
+                .setCallback(pickerCallback)
+                .build();
+
+            console.log('Picker built, now setting visible.');
+            picker.setVisible(true);
+        }
+
+        function pickerCallback(data) {
+            if (data[google.picker.Response.ACTION] == google.picker.Action.PICKED) {
+                const doc = data[google.picker.Response.DOCUMENTS][0];
+                const id = doc[google.picker.Document.ID];
+                const url = doc[google.picker.Document.URL];
+                alert('You picked: ' + url);
+            }
+        }
+
+        window.onload = gisLoaded;
+    </script>
+</head>
+<body>
+    <h1>Google Identity Services Example</h1>
+    <button id="authorize_button" onclick="handleAuthClick()">Authorize</button>
+</body>
+</html>
